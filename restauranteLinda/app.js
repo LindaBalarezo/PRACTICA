@@ -1,16 +1,12 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var session = require('express-session');
-var FileStore = require('session-file-store')(session);
 var passport = require('passport');
-var authenticate = require('./authenticate');
+var config = require('./config');
 
 const mongoose = require('mongoose');
-const Dishes = require('./models/dishes');
-const url = 'mongodb://localhost:27017/restoSegInfOct24';
+const url = config.mongoUrl;
 const connect = mongoose.connect(url);
 connect.then((db) => {
   console.log("Conectado correctamente al server");
@@ -38,68 +34,11 @@ app.use('/', indexRouter);
 app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser('12345-67890-09876-54321'));
 
-app.use(session({
-  name: 'session-id',
-  secret: '12345-67890-09876-54321',
-  saveUninitialized: true,
-  resave: false,
-  store: new FileStore(),
-  cookie: { secure: false }
-}));
+
 app.use(passport.initialize());
-app.use(passport.session());
-/*
-function auth(req, res, next) {
-  console.log(req.signedCookies);
-  if (!req.signedCookies.user) {
-    var authheader = req.headers.authorization;
-    if (!authheader) {
-      var err = new Error('No se ha encontrado credenciales');
-      res.setHeader('WWW-Authenticate', 'Basic');
-      err.status = 401;
-      return next(err);
-    }
-    var auth = new Buffer.from(authheader.split(' ')[1], 'base64').toString().split(':');
-    var username = auth[0];
-    var password = auth[1];
-    if (username === 'admin' && password === 'password') {
-      res.cookie('user', 'admin', {signed:true});
-      //req.session.user = 'admin';
-      next();
-    }
-    else {
-      var err = new Error('Credenciales incorrectas');
-      res.setHeader('WWW-Authenticate', 'Basic');
-      err.status = 401;
-      return next(err);
-    }
-  }
-  else {
-    if (req.signedCookies.user === 'admin') {
-      next();
-    }
-    else {
-      var err = new Error('No esta autenticado');
-      err.status = 401;
-      return next(err);
-    }
-  }
-}
-*/
+
+
 app.use('/users', usersRouter); 
-
-function auth(req, res, next) {
-  console.log(req.user);
-
-  if (!req.user) {
-    var err = new Error('No esta autenticado');
-    err.status = 403;
-    return next(err);
-  } else{
-    next();
-  }
-}
-
 app.use(auth);
 app.use(express.static(path.join(__dirname, 'public')));
 

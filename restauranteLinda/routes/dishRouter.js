@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const mongoose=require('mongoose');
 const Dishes=require('../models/dishes');
 const dishRouter = express.Router();
+const authenticate = require('../authenticate');
+
 dishRouter.use(bodyParser.json());
 dishRouter.route('/')
 
@@ -16,15 +18,9 @@ dishRouter.route('/')
     .catch((err)=>next(err));
 })
 
-/*.get((req, res, next)=>{
-    res.end('Enviamos todos los platos')
-})
 
-.post((req, res, next)=>{
-    res.end('Agregar el plato: ' + req.body.name + ', ' + req.body.description);
-})*/
 
-.post((req, res, next)=>{
+.post(authenticate.verifyUser ,(req, res, next)=>{
     Dishes.create(req.body)
     .then((dish)=>{
         console.log('Plato creado', dish);
@@ -40,7 +36,7 @@ dishRouter.route('/')
     res.end('Operacion PUT no válida en este endpoint ')
 })
 
-.delete((req, res, next)=>{
+.delete(authenticate.verifyUser ,(req, res, next)=>{
    Dishes.deleteMany({})
    .then((resp)=>{
     res.statusCode=200;
