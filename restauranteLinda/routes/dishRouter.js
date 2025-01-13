@@ -18,8 +18,6 @@ dishRouter.route('/')
     .catch((err)=>next(err));
 })
 
-
-
 .post(authenticate.verifyUser ,(req, res, next)=>{
     Dishes.create(req.body)
     .then((dish)=>{
@@ -31,7 +29,7 @@ dishRouter.route('/')
     .catch((err)=>next(err));
 })
 
-.put((req, res, next)=>{
+.put(authenticate.verifyUser,(req, res, next)=>{
     res.statusCode=403;
     res.end('Operacion PUT no válida en este endpoint ')
 })
